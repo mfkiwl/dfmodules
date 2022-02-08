@@ -180,16 +180,14 @@ FakeDataProd::do_work(std::atomic<bool>& running_flag)
     size_t num_bytes_to_send = num_frames_to_send * m_frame_size;
 
     // We don't care about the content of the data, but the size should be correct
+    std::unique_ptr<void, decltype(free)*> fake_data(malloc(num_bytes_to_send), free); 
 
-    std::vector<uint8_t> fake_data;
-    try {
-      fake_data.resize(num_bytes_to_send);
-    } catch (const std::bad_alloc& ) {
+    // This should really not happen
+    if (fake_data == nullptr) {
       throw dunedaq::dfmodules::MemoryAllocationFailed(ERS_HERE, get_name(), num_bytes_to_send);
     }
-
     std::unique_ptr<daqdataformats::Fragment> data_fragment_ptr(
-								new daqdataformats::Fragment(fake_data.data(), 
+								new daqdataformats::Fragment(fake_data.get(), 
 											     num_bytes_to_send));
     data_fragment_ptr->set_trigger_number(data_request.trigger_number);
     data_fragment_ptr->set_run_number(m_run_number);

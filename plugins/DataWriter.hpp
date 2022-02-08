@@ -14,7 +14,7 @@
 #include "appfwk/DAQModule.hpp"
 #include "appfwk/DAQSink.hpp"
 #include "appfwk/DAQSource.hpp"
-#include "utilities/WorkerThread.hpp"
+#include "appfwk/ThreadHelper.hpp"
 #include "daqdataformats/TriggerRecord.hpp"
 #include "dfmessages/TriggerDecisionToken.hpp"
 
@@ -55,7 +55,7 @@ private:
   void do_scrap(const data_t&);
 
   // Threading
-  dunedaq::utilities::WorkerThread m_thread;
+  dunedaq::appfwk::ThreadHelper m_thread;
   void do_work(std::atomic<bool>&);
 
   // Configuration

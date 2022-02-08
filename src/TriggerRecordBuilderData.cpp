@@ -13,10 +13,6 @@
 
 #include "logging/Logging.hpp"
 
-#include <memory>
-#include <string>
-#include <utility>
-
 /**
  * @brief Name used by TRACE TLOG calls from this source file
  */
@@ -27,7 +23,6 @@ namespace dfmodules {
 
 TriggerRecordBuilderData::TriggerRecordBuilderData(std::string connection_name, size_t capacity)
   : m_num_slots(capacity)
-  , m_in_error(false)
   , m_connection_name(connection_name)
 {}
 
@@ -41,7 +36,6 @@ TriggerRecordBuilderData::TriggerRecordBuilderData(TriggerRecordBuilderData&& ot
   m_latency_info = std::move(other.m_latency_info);
 
   m_metadata = std::move(other.m_metadata);
-  m_in_error = other.m_in_error.load();
 }
 
 TriggerRecordBuilderData&
@@ -55,7 +49,6 @@ TriggerRecordBuilderData::operator=(TriggerRecordBuilderData&& other)
   m_latency_info = std::move(other.m_latency_info);
 
   m_metadata = std::move(other.m_metadata);
-  m_in_error = other.m_in_error.load();
 
   return *this;
 }
@@ -122,9 +115,6 @@ void
 TriggerRecordBuilderData::add_assignment(std::shared_ptr<AssignedTriggerDecision> assignment)
 {
   auto lk = std::lock_guard<std::mutex>(m_assigned_trigger_decisions_mutex);
-
-  if (!has_slot())
-    throw NoSlotsAvailable(ERS_HERE, assignment->decision.trigger_number, m_connection_name);
   m_assigned_trigger_decisions.push_back(assignment);
   TLOG_DEBUG(13) << "Size of assigned_trigger_decision list is " << m_assigned_trigger_decisions.size();
 }
